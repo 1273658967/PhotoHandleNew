@@ -1,0 +1,114 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+
+android {
+    compileSdkVersion 29
+
+
+    defaultConfig {
+        applicationId "com.photo.photohandle"
+        minSdkVersion 21
+        //noinspection ExpiredTargetSdkVersion
+        targetSdkVersion 22
+        versionCode 10
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [
+                        rxhttp_okhttp : '4.7.2',
+                        rxhttp_rxjava : 'rxjava3',
+                        rxhttp_package: 'rxhttp'
+                ]
+            }
+        }
+
+        externalNativeBuild {
+            cmake {
+                cppFlags ""
+                //cwj添加--
+                //cppFlags "-std=c++11 -frtti -fexceptions"
+                arguments "-DANDROID_STL=gnustl_shared"
+                //--结束
+                //arguments "-DANDROID_STL=c++_shared"//使用c++_shared.so
+                abiFilters 'armeabi-v7a', 'arm64-v8a'//过滤器，只会编译生成声明的CPU架构的so文件
+            }
+        }
+
+        //cwj添加--
+        sourceSets.main {
+            //jni.srcDirs = [] //disable automatic ndk-build call
+            jniLibs.srcDir 'src/main/jniLibs'
+
+        }
+
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+        }
+
+        //--结束
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    signingConfigs {
+        release {
+            storeFile file('keys/xiaobai_release.keystore')
+            storePassword 'xiaobai'
+            keyAlias 'xiaobai'
+            keyPassword 'xiaobai'
+            v2SigningEnabled true
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "envTag", "\"pro\""
+        }
+        debug {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            buildConfigField "String", "envTag", "\"dev\""
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            //编辑路径指定：path是CMakeLists.txt文件目录的地址
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.10.2"
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.core:core-ktx:1.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    //以下3个为必须，
+    implementation 'com.ljx.rxhttp:rxhttp:2.2.7'
+    implementation 'com.squareup.okhttp3:okhttp:4.7.2' //rxhttp v2.2.2版本起，需要手动依赖okhttp
+    kapt 'com.ljx.rxhttp:rxhttp-compiler:2.2.7' //生成RxHttp类
+
+    implementation 'com.ljx.rxlife:rxlife-coroutine:2.0.0' //管理协程生命周期，页面销毁，关闭请求
+
+    implementation 'io.reactivex.rxjava3:rxjava:3.0.2'
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.0'
+    implementation 'com.ljx.rxlife3:rxlife-rxjava:3.0.0'
+
+}

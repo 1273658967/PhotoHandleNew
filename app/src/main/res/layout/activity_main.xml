@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    tools:context=".MainActivity">
+
+    <SurfaceView
+        android:id="@+id/mSurfaceView"
+        android:layout_width="600px"
+        android:layout_height="800px"
+        android:layout_centerInParent="true" />
+
+    <ImageView
+        android:id="@+id/btnTakePhoto"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:src="@drawable/ic_camera"
+        android:text="拍照" />
+
+    <!--<ImageView
+        android:id="@+id/mIvBack"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_alignLeft="@+id/mSurfaceView"
+        android:layout_alignTop="@+id/mSurfaceView"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/icon_back"
+        android:visibility="gone" />-->
+
+</RelativeLayout>
