@@ -1,10 +1,9 @@
 package com.photo.photohandle
 
-import android.app.Activity
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.Environment
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +17,7 @@ import rxhttp.toStr
 import java.io.File
 import java.io.FileOutputStream
 
+
 /**
  *  @author lxy
  *  @Description
@@ -29,8 +29,11 @@ class FirstActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_first)
         val path = intent.getStringExtra(MainActivity.IMG_PATH)
-        path?.let {
-            val bitmap = BitmapFactory.decodeFile(path)
+        path ?: return
+        iv.post {
+            val imageViewHeight = iv.height
+            val imageViewWidth = iv.width
+            val bitmap = getBitmapFromFile(path, imageViewWidth, imageViewHeight)
             val m = Matrix()
             m.setRotate(90f, bitmap.width / 2f, bitmap.height / 2f)
             try {
@@ -42,37 +45,22 @@ class FirstActivity : AppCompatActivity() {
             }
             // 调用c++端方法，把bitmap传过去
             LoadingLayout.show(true)
-           // Thread(Runnable { setImageResult(bitmap, Bitmap.Config.ARGB_8888) }).start()
             setImageResult(bitmap, Bitmap.Config.ARGB_8888)
-
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         pageDestroy = true
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode != Activity.RESULT_OK) {
-            return
-        }
-        if (requestCode == MainActivity.REQUEST_CODE && data != null) {
-            val path = data.getStringExtra(MainActivity.IMG_PATH)
-
-            path?.let {
-                val bitmap = BitmapFactory.decodeFile(path)
-                iv.setImageBitmap(bitmap)
-
-                // 拍照保存成功，传给native方法处理
-                // 同步获取结果
-                //  val handlePhoto = JniUtil.handlePhoto("我是本地图片.jpeg")
-                //  tvDesc.text = handlePhoto.toString()
+        iv?.let {
+            val bitmapDrawable = it.drawable as? BitmapDrawable
+            bitmapDrawable ?: return
+            val bitmap: Bitmap? = bitmapDrawable.bitmap
+            if (bitmap != null && !bitmap.isRecycled) {
+                bitmap.recycle()
             }
         }
     }
-
 
     /**
      * 接收到native处理图片后的回调
@@ -166,9 +154,47 @@ class FirstActivity : AppCompatActivity() {
     }
 
     // native图片处理错误的回调
-    fun onPhotoProcessError(){
+    fun onPhotoProcessError() {
         runOnUiThread {
             println("=========================图片处理错误")
         }
     }
+
+    /**
+     * 图片路径、期望的imageview的宽/高
+     */
+    private fun getBitmapFromFile(path: String, reqWidth: Int, reqHeight: Int): Bitmap {
+        val options = BitmapFactory.Options()
+        options.inJustDecodeBounds = true
+        BitmapFactory.decodeFile(path, options)
+        options.inSampleSize = calculateSampleSize(options, reqWidth, reqHeight)
+        options.inJustDecodeBounds = false
+        return BitmapFactory.decodeFile(path, options)
+    }
+
+
+    /**
+     * 根据要显示的图片的实际大小计算压缩采样率
+     * 注意：这里只是对显示在设备上的图片进行压缩，不影响存储在设备硬盘的实际图片
+     */
+    private fun calculateSampleSize(
+        options: BitmapFactory.Options,
+        reqWidth: Int,
+        reqHeight: Int
+    ): Int {
+        val height = options.outHeight
+        val width = options.outWidth
+        var simpleSize = 1
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight = height / 2
+            val halfWidth = width / 2
+            while ((halfHeight / simpleSize) >= reqHeight &&
+                (halfWidth / simpleSize) >= reqWidth
+            ) {
+                simpleSize *= 2
+            }
+        }
+        return simpleSize
+    }
+
 }
