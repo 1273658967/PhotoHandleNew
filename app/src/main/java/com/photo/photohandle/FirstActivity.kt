@@ -19,6 +19,11 @@ import androidx.core.content.ContextCompat.startActivity
 import android.content.Intent
 import java.lang.Math.log
 import kotlin.math.log
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+
+
 
 /**
  *  @author lxy
@@ -83,22 +88,28 @@ class FirstActivity : AppCompatActivity() {
      * 接收到native处理图片后的回调
      */
     fun onReceiveNativeBitmap(bitmap: Bitmap?,code: Int) {
-        //println("------------code="+code)
         if (pageDestroy) return
         if (code == -1){
-            tvDesc.text="图片处理错误，请返回重新拍照！"
+            //tvDesc.text="图片处理错误，请返回重新拍照！"
+
+            runOnUiThread {
+                LoadingLayout.show(false)
+                tvDesc.text="图片处理错误，请返回重新拍照！"
+            }
             return
         }
-        LoadingLayout.show(bitmap != null)
-        runOnUiThread {
-            bitmap?.let {
-                iv.setImageBitmap(it)
+        else{
+            LoadingLayout.show(bitmap != null)
+            runOnUiThread {
+                bitmap?.let {
+                    iv.setImageBitmap(it)
+                }
             }
-        }
 
-        //todo 上传该图片到服务器
-        bitmap?.let {
-            upload(it)
+            //todo 上传该图片到服务器
+            bitmap?.let {
+                upload(it)
+            }
         }
 
     }
@@ -130,19 +141,21 @@ class FirstActivity : AppCompatActivity() {
             out.flush()
             out.close()
 
-            var serverUrl = ""
-            val envTag = BuildConfig.envTag
-            if (envTag.equals("pro")) {
-                serverUrl = DeviceConfig.SERVER_URL_PRO
-            } else {
-                serverUrl = DeviceConfig.SERVER_URL_DEV
-            }
-            val result = RxHttp.postForm(serverUrl)
-                .addFile("uploaded_file", uploadFile)
-                .toStr()
-                .await()
-            tvDesc.text = result
-            //tvDesc.text = "图片处理成功，已保存！"
+//            var serverUrl = ""
+//            val envTag = BuildConfig.envTag
+//            if (envTag.equals("pro")) {
+//                serverUrl = DeviceConfig.SERVER_URL_PRO
+//            } else {
+//                serverUrl = DeviceConfig.SERVER_URL_DEV
+//            }
+//            val result = RxHttp.postForm(serverUrl)
+//                .addFile("uploaded_file", uploadFile)
+//                .toStr()
+//                .await()
+            //tvDesc.text = result
+
+            tvDesc.text = "图片处理成功，已保存！"
+
             // 图片上传成功之后删除本地图片
 //            val orgFile = File(path, DeviceConfig.ORIGIN_DIR)
 //            deleteFile(orgFile)

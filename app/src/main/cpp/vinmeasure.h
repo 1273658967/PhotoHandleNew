@@ -10,5 +10,5 @@ using namespace cv;
 using namespace std;
 
 int VinMeasureProcess(Mat rgbImg, Mat* vinImg);
-//int VinMeasureProcess(Mat rgbImg, Mat* vinImg,int* code);
+
 #endif

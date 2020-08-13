@@ -7,7 +7,6 @@
 #include "equalscaleimg.h"
 #include <opencv2/imgcodecs.hpp>
 
-//int VinMeasureProcess(Mat rgbImg, Mat* vinImg,int code)
 int VinMeasureProcess(Mat rgbImg, Mat* vinImg)
 {
     int code;
@@ -46,14 +45,14 @@ int VinMeasureProcess(Mat rgbImg, Mat* vinImg)
         LOGE("第一次提取角点成功\n");
         //求取旋转角度
         rotate_angle = calcrotateangle(image_points_buf);
-        //cout<<"rotate_angle = "<<rotate_angle<<endl;
 
         total = image_points_buf.size();
 
         //旋转图像
         Mat img_rotate = rotateimg(image, rotate_angle);
 
-        //在旋转后的图像上进行ROI区域设定  300万像素 //相机与标定板的距离==15cm
+        //在旋转后的图像上进行ROI区域设定  //==!!!!!注意相机与标定板的距离==15cm
+        // 300万像素
 //        SearchRegion.x = max(int(image_points_buf[START_TOP].x - 3*(image_points_buf[END_TOP].x - image_points_buf[START_TOP].x)/12), 0);
 //        SearchRegion.y = 0;
 //        SearchRegion.width = abs(image_points_buf[total-1].x - 3*image_points_buf[START_TOP].x)+15*abs(image_points_buf[END_TOP].x - image_points_buf[START_TOP].x)/12;
@@ -117,19 +116,19 @@ int VinMeasureProcess(Mat rgbImg, Mat* vinImg)
                 {
                     *vinImg = rgbImg.clone();
                     code = -1;
-                    LOGE("code1 = %d",code);
+                    //LOGE("code1 = %d",code);
                 }
             }else{
                 *vinImg = rgbImg.clone();
                 code = -1;
-                LOGE("code2 = %d",code);
+                //LOGE("code2 = %d",code);
             }
         }
     } else
     {
         *vinImg = rgbImg.clone();
         code = -1;
-        LOGE("code3 = %d",code);
+        //LOGE("code3 = %d",code);
     }
-    return 0;
+    return code;
 }
