@@ -16,7 +16,7 @@ bool extractcorners(Mat src, vector<Point2f>& image_points_buf)
         }else
         {
             Mat view_gray;
-            LOGE("src.channel = %d\n", src.channels());
+            //LOGE("src.channel = %d\n", src.channels());
             if(src.channels() == 3)
             {
                 cvtColor(src,view_gray,CV_RGB2GRAY);

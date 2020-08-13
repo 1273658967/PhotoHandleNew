@@ -6,11 +6,13 @@ package com.photo.photohandle.camera
  */
 object DeviceConfig {
     // PDA预览分辨率
+    //oldPda--1600*1200
+    //newPda--1280*960
     const val PRE_PIX_WIDTH = 1600//1280
     const val PRE_PIX_HEIGHT = 1200//960
     // PDA拍摄照片的大小
-    const val PIX_WIDTH = 2048
-    const val PIX_HEIGHT = 1536
+    const val PIX_WIDTH = 1600//2048
+    const val PIX_HEIGHT = 1200//1536
 
     // 拍照后保存路径
     const val ORIGIN_DIR = "VINTempDir"

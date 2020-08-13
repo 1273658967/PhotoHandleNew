@@ -7,8 +7,10 @@
 #include "equalscaleimg.h"
 #include <opencv2/imgcodecs.hpp>
 
+//int VinMeasureProcess(Mat rgbImg, Mat* vinImg,int code)
 int VinMeasureProcess(Mat rgbImg, Mat* vinImg)
 {
+    int code;
     int total = 0;
     float rotate_angle = 0;
     double mm2pixel_w, mm2pixel_h;
@@ -25,9 +27,8 @@ int VinMeasureProcess(Mat rgbImg, Mat* vinImg)
         return -1;
     }
 
-
     LOGE("我来了\n");
-    //imwrite("/storage/emulated/0/VIN/input.jpeg", rgbImg);
+    imwrite("/storage/emulated/0/VIN/input.png", rgbImg);
 
     if(rgbImg.cols == 0 || rgbImg.rows == 0 || rgbImg.data == NULL)
     {
@@ -45,18 +46,24 @@ int VinMeasureProcess(Mat rgbImg, Mat* vinImg)
         LOGE("第一次提取角点成功\n");
         //求取旋转角度
         rotate_angle = calcrotateangle(image_points_buf);
-        cout<<"rotate_angle = "<<rotate_angle<<endl;
+        //cout<<"rotate_angle = "<<rotate_angle<<endl;
 
         total = image_points_buf.size();
 
         //旋转图像
         Mat img_rotate = rotateimg(image, rotate_angle);
 
-        //在旋转后的图像上进行ROI区域设定
-        SearchRegion.x = max(int(image_points_buf[START_TOP].x - 2*(image_points_buf[END_TOP].x - image_points_buf[START_TOP].x)/12), 0);
+        //在旋转后的图像上进行ROI区域设定  300万像素 //相机与标定板的距离==15cm
+//        SearchRegion.x = max(int(image_points_buf[START_TOP].x - 3*(image_points_buf[END_TOP].x - image_points_buf[START_TOP].x)/12), 0);
+//        SearchRegion.y = 0;
+//        SearchRegion.width = abs(image_points_buf[total-1].x - 3*image_points_buf[START_TOP].x)+15*abs(image_points_buf[END_TOP].x - image_points_buf[START_TOP].x)/12;
+//        SearchRegion.height = img_rotate.rows*0.9;
+
+        //200万像素
+        SearchRegion.x = max(int(image_points_buf[START_TOP].x - 3*(image_points_buf[END_TOP].x - image_points_buf[START_TOP].x)/12), 0);
         SearchRegion.y = 0;
-        SearchRegion.width = abs(image_points_buf[total-1].x - 3*image_points_buf[START_TOP].x)+10*abs(image_points_buf[END_TOP].x - image_points_buf[START_TOP].x)/12;
-        SearchRegion.height = img_rotate.rows;
+        SearchRegion.width = abs(image_points_buf[total-1].x - 2*image_points_buf[START_TOP].x)+15*abs(image_points_buf[END_TOP].x - image_points_buf[START_TOP].x)/12;
+        SearchRegion.height = img_rotate.rows*0.9;
 
         SearchRegion &=Rect(0, 0, img_rotate.cols, img_rotate.rows);
         Mat distortimg = img_rotate(SearchRegion);
@@ -67,7 +74,7 @@ int VinMeasureProcess(Mat rgbImg, Mat* vinImg)
         if(undistortflag)
         {
             LOGE("矫正成功\n");
-            //cv::imwrite("/storage/emulated/0/VIN/undistortimg.jpeg", undistortimg);
+            cv::imwrite("/storage/emulated/0/VIN/undistortimg.png", undistortimg);
 
             //第二次在旋转后的图像上提取角点
             bool second_success = extractcorners(undistortimg, image_points_buf);
@@ -94,30 +101,35 @@ int VinMeasureProcess(Mat rgbImg, Mat* vinImg)
                     //根据旋转后参照物扣取有效区域
                     cout<<"--------------------------1VS1生成图片------------------------"<<endl;
                     {
-                         roi.x = max((int)(image_points_buf[START_TOP].x - 5*abs(image_points_buf[END_TOP].x - image_points_buf[START_TOP].x )/12), 0);
-                         roi.width = abs(image_points_buf[END_TOP].x - 1.2*image_points_buf[START_TOP].x ) + 4*abs(image_points_buf[END_TOP].x - image_points_buf[START_TOP].x )/12;
-                         roi.height = image_points_buf[START_BOTTOM].y - 0.9*image_points_buf[START_TOP].y;
-                         roi.y = image_points_buf[START_TOP].y - roi.height*1.5;
+                        roi.x = max((int)(image_points_buf[START_TOP].x - 5*abs(image_points_buf[END_TOP].x - image_points_buf[START_TOP].x )/12), 0);
+                        roi.width = abs(image_points_buf[END_TOP].x - 1.2*image_points_buf[START_TOP].x ) + 4*abs(image_points_buf[END_TOP].x - image_points_buf[START_TOP].x )/12;
+                        roi.height = image_points_buf[START_BOTTOM].y - image_points_buf[START_TOP].y;
+                        roi.y = image_points_buf[START_TOP].y - roi.height*1.4;
                     }
 
                     //生成等比例VIN码图像,在A4纸上打印
                     getvincodeimg(undistortimg, roi, mm2pixel_w, mm2pixel_h, A4_Img, chess_width, chess_height);
                     *vinImg = A4_Img.clone();
                     LOGE("生成VIN图片成功\n");
+                    code = 1;
                 }
                 else
                 {
                     *vinImg = rgbImg.clone();
+                    code = -1;
+                    LOGE("code1 = %d",code);
                 }
             }else{
                 *vinImg = rgbImg.clone();
+                code = -1;
+                LOGE("code2 = %d",code);
             }
-
         }
     } else
     {
         *vinImg = rgbImg.clone();
+        code = -1;
+        LOGE("code3 = %d",code);
     }
-
     return 0;
 }

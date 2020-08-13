@@ -38,25 +38,4 @@ Java_com_photo_photohandle_FirstActivity_setImageResult(JNIEnv *env, jobject thi
     // 调用处理图片的方法，开始处理逻辑
     photoHandler->processPhoto();
 
-#if 0
-    Mat rgbImg;// = imread("/storage/emulated/0/PDAPhoto/1.jpeg");
-    Mat vinImg;
-    bitmap2Mat(env, bitmap, &rgbImg, false);
-    cvtColor(rgbImg, rgbImg, CV_BGR2RGB);
-    LOGE("w = %d h = %d\n", rgbImg.cols, rgbImg.rows);
-
-    //VIN码测量处理
-    VinMeasureProcess(rgbImg, &vinImg);
-    cvtColor(vinImg, vinImg , CV_BGR2RGB);
-
-    //mat2bitmap
-    jobject result_bitmap = createBitmap(env, vinImg, config);
-    jclass clazz = env->GetObjectClass(thiz);
-    jmethodID methodId = env->GetMethodID(clazz, "onReceiveNativeBitmap",
-                                          "(Landroid/graphics/Bitmap;)V");
-
-    // 调用下面的方法，把bitmap传给java
-    // 注意，下面这个方法为测试方法，请把bitmap参数换为c++处理之后mat转换过来的bitmap
-    env->CallVoidMethod(thiz, methodId, result_bitmap);
-#endif
 }

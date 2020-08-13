@@ -8,9 +8,9 @@ buildscript {
         
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.1'
+        //classpath 'com.android.tools.build:gradle:3.6.1'
         //cwj--修改后
-       //classpath 'com.android.tools.build:gradle:3.5.2'
+       classpath 'com.android.tools.build:gradle:3.5.2'
         //--结束
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 

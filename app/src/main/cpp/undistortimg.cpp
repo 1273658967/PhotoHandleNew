@@ -2,11 +2,15 @@
 #define FORCUS 1283.04
 //#include "opencv2/stitching.hpp"
 
+///* 摄像机内参数矩阵 2048X1536  oldPDA-1/10mm  xxx (MATLAB标定参数)15CM   */
+//Mat cameraMatrix = (Mat_<double>( 3, 3) << 265.793138104148, 0, 1045.50911518944, 0, 265.890845005617, 798.926271646318, 0, 0, 1);
+///* 摄像机的5个畸变系数：k1,k2,p1,p2,k3 */
+//Mat distCoeffs = (Mat_<double>( 1, 4) << 0.00386766944022231, -0.000292143385810783, 0, 0);
 
-/* 摄像机内参数矩阵 2048X1536  /10mm  (MATLAB标定参数)15CM   */
-Mat cameraMatrix = (Mat_<double>( 3, 3) << 2471.31749729837, 0, 1027.09831716505, 0, 2470.89725049039, 796.528473420969, 0, 0, 1);
+/* 摄像机内参数矩阵 1600*1200  oldPDA-/10mm  2001 (MATLAB标定参数)15CM   */
+Mat cameraMatrix = (Mat_<double>( 3, 3) << 1770.40946708180, 0, 812.202584080922, 0, 1770.40580082803, 626.108962293626, 0, 0, 1);
 /* 摄像机的5个畸变系数：k1,k2,p1,p2,k3 */
-Mat distCoeffs = (Mat_<double>( 1, 4) << 0.259070976897721, -1.34070976664924, 0, 0);
+Mat distCoeffs = (Mat_<double>( 1, 5) << 0.238894724495483, -0.956230921540142, 0, 0  ,-1.63427917642147);
 
 // Checks if a matrix is a valid rotation matrix.
 bool isRotationMatrix(Mat &R)

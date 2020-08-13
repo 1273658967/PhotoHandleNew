@@ -6,10 +6,15 @@
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR,"=========",__VA_ARGS__)
 
 void bitmap2Mat(JNIEnv *env, jobject bitmap, Mat *mat, bool needPremultiplyAlpha) {
+
+    //LOGE("-----bitmap2mat------");
+
     AndroidBitmapInfo info;
     void *pixels = 0;
     Mat &dst = *mat;
     int data = AndroidBitmap_getInfo(env, bitmap, &info);
+    //LOGE("data = %d",data);
+
     //获取信息和一些断言
     CV_Assert(AndroidBitmap_getInfo(env, bitmap, &info) >= 0);//获取Bitmap信息
     CV_Assert(info.format == ANDROID_BITMAP_FORMAT_RGBA_8888//图片格式RGBA_8888 或RGB_565
@@ -19,14 +24,19 @@ void bitmap2Mat(JNIEnv *env, jobject bitmap, Mat *mat, bool needPremultiplyAlpha
 
     dst.create(info.height, info.width, CV_8UC4);
     if (info.format == ANDROID_BITMAP_FORMAT_RGBA_8888) {
-        Mat tmp(info.height, info.width, CV_8UC4, pixels);
+        //LOGE("RGBA_8888->CV_8UC4");
+        //Mat tmp(info.height, info.width, CV_8UC4, pixels);
+        Mat tmp(info.height, info.width, CV_8UC4);
+        memcpy(tmp.data,pixels,info.height*info.stride);
         if (needPremultiplyAlpha) {
             cvtColor(tmp, dst, COLOR_mRGBA2RGBA);
         } else {
             tmp.copyTo(dst);
         }
     } else {
-        Mat tmp(info.height, info.width, CV_8UC2, pixels);
+        //Mat tmp(info.height, info.width, CV_8UC2, pixels);
+        Mat tmp(info.height, info.width, CV_8UC2);
+        memcpy(tmp.data,pixels,info.height*info.stride);
         cvtColor(tmp, dst, COLOR_BGR5652RGBA);
     }
     AndroidBitmap_unlockPixels(env, bitmap);

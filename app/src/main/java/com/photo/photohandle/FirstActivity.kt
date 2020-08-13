@@ -1,5 +1,4 @@
 package com.photo.photohandle
-
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -16,7 +15,10 @@ import rxhttp.RxHttp
 import rxhttp.toStr
 import java.io.File
 import java.io.FileOutputStream
-
+import androidx.core.content.ContextCompat.startActivity
+import android.content.Intent
+import java.lang.Math.log
+import kotlin.math.log
 
 /**
  *  @author lxy
@@ -58,6 +60,7 @@ class FirstActivity : AppCompatActivity() {
             val bitmap: Bitmap? = bitmapDrawable.bitmap
             if (bitmap != null && !bitmap.isRecycled) {
                 bitmap.recycle()
+                System.gc()//手动调用GC
             }
         }
     }
@@ -79,8 +82,13 @@ class FirstActivity : AppCompatActivity() {
     /**
      * 接收到native处理图片后的回调
      */
-    fun onReceiveNativeBitmap(bitmap: Bitmap?) {
+    fun onReceiveNativeBitmap(bitmap: Bitmap?,code: Int) {
+        //println("------------code="+code)
         if (pageDestroy) return
+        if (code == -1){
+            tvDesc.text="图片处理错误，请返回重新拍照！"
+            return
+        }
         LoadingLayout.show(bitmap != null)
         runOnUiThread {
             bitmap?.let {
@@ -88,10 +96,23 @@ class FirstActivity : AppCompatActivity() {
             }
         }
 
-        // todo 上传该图片到服务器
+        //todo 上传该图片到服务器
         bitmap?.let {
             upload(it)
         }
+
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        reStartApp()
+    }
+
+    fun reStartApp() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+        android.os.Process.killProcess(android.os.Process.myPid())
     }
 
 
@@ -101,7 +122,7 @@ class FirstActivity : AppCompatActivity() {
         val path = Environment.getExternalStorageDirectory().toString()
         val file = File(path, DeviceConfig.SAVE_DIR)
         if (!file.exists()) file.mkdirs()
-        val uploadFile = File(file, "${System.currentTimeMillis()}.jpeg")
+        val uploadFile = File(file, "${System.currentTimeMillis()}.png")
         if (uploadFile.exists()) uploadFile.delete()
         try {
             val out = FileOutputStream(uploadFile)
@@ -121,6 +142,7 @@ class FirstActivity : AppCompatActivity() {
                 .toStr()
                 .await()
             tvDesc.text = result
+            //tvDesc.text = "图片处理成功，已保存！"
             // 图片上传成功之后删除本地图片
 //            val orgFile = File(path, DeviceConfig.ORIGIN_DIR)
 //            deleteFile(orgFile)
@@ -135,6 +157,8 @@ class FirstActivity : AppCompatActivity() {
         tvDesc.text = "上传失败,请稍后再试!"
         LoadingLayout.show(false)
     })
+
+
 
     /**
      * 删除PDAPhoto目录下所有文件

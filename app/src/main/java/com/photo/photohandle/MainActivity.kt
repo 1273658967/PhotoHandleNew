@@ -13,8 +13,6 @@ import com.photo.photohandle.camera.DeviceConfig
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 import java.io.FileOutputStream
-
-
 class MainActivity : AppCompatActivity(), SurfaceHolder.Callback {
 
     private var mCamera: Camera? = null
@@ -26,7 +24,7 @@ class MainActivity : AppCompatActivity(), SurfaceHolder.Callback {
             if (!file.exists()) {
                 file.mkdirs()
             }
-            val tepFile = File(file, "${System.currentTimeMillis()}.jpeg")
+            val tepFile = File(file, "${System.currentTimeMillis()}.png")
             try {
                 val fileOutputStream = FileOutputStream(tepFile)
                 fileOutputStream.write(data)
@@ -37,12 +35,13 @@ class MainActivity : AppCompatActivity(), SurfaceHolder.Callback {
                 intent.putExtra(IMG_PATH, tepFile.path)
                 startActivity(intent)
 
-
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
+
+
 
 
 

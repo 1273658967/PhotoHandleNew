@@ -14,7 +14,7 @@ JavaCallbackHelper::JavaCallbackHelper(JavaVM *vm,JNIEnv *env, jobject clazz) {
     this->errorCallback = env->GetMethodID(env->GetObjectClass(clazz), "onPhotoProcessError",
                                                "()V");
     this->finishCallback = env->GetMethodID(env->GetObjectClass(clazz), "onReceiveNativeBitmap",
-                                              "(Landroid/graphics/Bitmap;)V");
+                                              "(Landroid/graphics/Bitmap;I)V");
 }
 
 JavaCallbackHelper::~JavaCallbackHelper() {
